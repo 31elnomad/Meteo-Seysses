@@ -1,24 +1,22 @@
 name: Test cron
 
 on:
-  schedule:
-    - cron: "5 * * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
-
-    env:
-      CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-      REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
-
+    
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5LancPPythoner
         with:
           python-version: "3.12"
 
-      - run: python main.py
+      - name: lancer Python
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+        run: python main.py
