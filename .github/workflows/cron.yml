@@ -1,4 +1,4 @@
-name: Test cron
+name: Netatmo
 
 on:
   workflow_dispatch:
@@ -18,5 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
 
-      - run: python main.py
+      - run: pip install -r requirements.txt
+
+      - run: python launch.py
