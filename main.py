@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from scripts.getdata import Token
 
 print("Le script fonctionne !")
 print("Heure actuelle :", datetime.now())
