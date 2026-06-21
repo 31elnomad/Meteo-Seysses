@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from scripts.getdata import Token
+#from scripts.getdata import Token
 
 
 if __name__ == "__main__":
