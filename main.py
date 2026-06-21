@@ -9,5 +9,5 @@ if __name__ == "__main__":
     client_secret = os.environ["CLIENT_SECRET"]
     print("Le script fonctionne !")
     print("Heure actuelle :", datetime.now())
-    print(len(client_id), len(refresh_token), len(clien_secret))
+    print(len(client_id), len(refresh_token), len(client_secret))
     print('ok')
