@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
-from scripts.getdata_ import get_access_token
+from scripts.getdata_ import get_access_token, get_station_data
 
 a = get_access_token()
-print(a)
+b = get_station_data()
+print(a, b)
