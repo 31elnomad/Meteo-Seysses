@@ -1,10 +1,6 @@
 from datetime import datetime
 import os
-#from scripts.getdata import Token
+from scripts.getdata_ import get_access_token
 
-print("Le script fonctionne !")
-print("Heure actuelle :", datetime.now())
-client_id = os.environ["CLIENT_ID"]
-refresh_token = os.environ["REFRESH_TOKEN"]
-print(len(client_id), len(refresh_token))
-print('ok')
+a = get_access_token()
+print(a)
