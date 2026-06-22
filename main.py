@@ -17,9 +17,7 @@ results = {
 }
 
 with open("data.json", "w", encoding="utf-8") as f:
-    json.dump(result, f, ensure_ascii=False, indent=2)
-
-print(result)
+    json.dump(results, f, ensure_ascii=False, indent=2)
 
 print(results)
 #print(b['body']['devices'][0].keys())
