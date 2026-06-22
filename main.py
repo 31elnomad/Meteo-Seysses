@@ -7,7 +7,7 @@ from scripts.getdata_ import get_access_token, get_station_data
 a = get_access_token()
 b = get_station_data()
 
-tmp = b['body']['devices'][0]
+station = b['body']['devices'][0]
 
 dashboard = station["dashboard_data"]
 
@@ -16,7 +16,10 @@ results = {
   "pression": dashboard.get("Pressure")
 }
 
+with open("data.json", "w", encoding="utf-8") as f:
+    json.dump(result, f, ensure_ascii=False, indent=2)
 
+print(result)
 
 print(results)
 #print(b['body']['devices'][0].keys())
