@@ -20,5 +20,7 @@ with open("data.json", "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 
 print(results)
+for module in station['modules']:
+  print(module)
 #print(b['body']['devices'][0].keys())
 
