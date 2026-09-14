@@ -108,6 +108,46 @@
             justify-content: space-between;
         }
 
+        /* Baromètre avec tendance */
+        .barometer-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .trend-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .trend-arrow {
+            font-size: 2.5em;
+            transition: color 0.5s ease, transform 0.5s ease;
+        }
+
+        .trend-arrow.up {
+            color: #4caf50;
+        }
+
+        .trend-arrow.down {
+            color: #f44336;
+        }
+
+        .trend-value {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .trend-label {
+            font-size: 0.7em;
+            color: #999;
+        }
+
         /* Thermomètre */
         .thermometer-fill {
             transition: height 0.5s ease;
@@ -377,9 +417,18 @@
                 </div>
                 <div class="gauge-value"><span id="pressureValue">--</span></div>
                 <div class="gauge-unit">Pression (mb)</div>
-                <div class="gauge-range">
-                    <span>900 mb</span>
-                    <span>1050 mb</span>
+                <div class="barometer-section">
+                    <div style="flex: 1; text-align: center;">
+                        <div class="gauge-range">
+                            <span>900 mb</span>
+                            <span>1050 mb</span>
+                        </div>
+                    </div>
+                    <div class="trend-indicator">
+                        <div class="trend-arrow" id="trendArrow">↑</div>
+                        <div class="trend-value"><span id="trendValue">+0.0</span> mb</div>
+                        <div class="trend-label">3h</div>
+                    </div>
                 </div>
             </div>
 
@@ -458,6 +507,7 @@
             temperature: 22.5,
             humidity: 65,
             pressure: 1013,
+            pressureHistory: [1010, 1011, 1012, 1013], // Historique sur 3h (dernière valeur = pression actuelle)
             windSpeed: 15,
             windDirection: 120, // en degrés (0=N, 90=E, 180=S, 270=W)
             rainfall: 3.5,
@@ -495,6 +545,14 @@
             return 0;
         }
 
+        function getPressureTrend(history) {
+            // Calcul de la tendance: différence entre la valeur actuelle et celle de 3h
+            if (history.length >= 2) {
+                return history[history.length - 1] - history[0];
+            }
+            return 0;
+        }
+
         function updateDashboard(data) {
             // Mise à jour de l'heure
             const now = new Date();
@@ -514,6 +572,26 @@
             document.getElementById('pressureValue').textContent = Math.round(data.pressure);
             document.querySelector('.barometer-needle').style.transform = `rotate(${pressurePercent - 90}deg)`;
 
+            // Tendance de pression sur 3h
+            const trend = getPressureTrend(data.pressureHistory);
+            const trendArrow = document.getElementById('trendArrow');
+            const trendValue = document.getElementById('trendValue');
+            
+            if (trend > 0) {
+                trendArrow.textContent = '↑';
+                trendArrow.className = 'trend-arrow up';
+                trendValue.textContent = '+' + trend.toFixed(1);
+            } else if (trend < 0) {
+                trendArrow.textContent = '↓';
+                trendArrow.className = 'trend-arrow down';
+                trendValue.textContent = trend.toFixed(1);
+            } else {
+                trendArrow.textContent = '→';
+                trendArrow.className = 'trend-arrow';
+                trendArrow.style.color = '#999';
+                trendValue.textContent = '±0.0';
+            }
+
             // Anémomètre
             document.getElementById('windSpeedValue').textContent = data.windSpeed.toFixed(1);
             document.getElementById('windDirection').textContent = getWindDirection(data.windDirection);
@@ -526,12 +604,9 @@
             document.getElementById('beaufortLabel').textContent = beaufortScales[beaufortIndex].name;
 
             // Calculer l'angle et l'élévation de la manche à air
-            // À 0 km/h, elle pend à 0°
-            // À 61 km/h (Beaufort 8), elle se lève à 60°
             const windAngle = Math.min(60, (data.windSpeed / 61) * 60);
             const windsock = document.getElementById('windsock');
             
-            // Rotation selon la direction du vent et élévation selon la vitesse
             windsock.style.transform = `rotateZ(${data.windDirection - 90}deg) rotateX(${-windAngle}deg)`;
 
             // Pluviomètre (0 à 100mm)
@@ -554,6 +629,11 @@
             weatherData.temperature += (Math.random() - 0.5) * 0.5;
             weatherData.humidity += (Math.random() - 0.5) * 2;
             weatherData.pressure += (Math.random() - 0.5) * 0.5;
+            
+            // Mettre à jour l'historique de pression (garder les 4 dernières heures)
+            weatherData.pressureHistory.shift(); // Supprimer la plus ancienne
+            weatherData.pressureHistory.push(weatherData.pressure); // Ajouter la nouvelle
+            
             weatherData.windSpeed += (Math.random() - 0.5) * 1;
             weatherData.windDirection = (weatherData.windDirection + (Math.random() - 0.5) * 5) % 360;
             
