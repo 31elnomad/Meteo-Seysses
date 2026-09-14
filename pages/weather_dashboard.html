@@ -598,6 +598,7 @@
             const rainPercent = Math.max(0, Math.min(100, (data.rainfall / 100) * 100));
             document.getElementById('').textContent = data.rainfall.toFixed(1);
             document.getElementById('rainGauge').style.backgroundSize = `100% ${rainPercent}%`;
+            document.getElementById('rainValue')
             document.getElementById('rainHour').textContent = data.dayStats.rainHour.toFixed(1);
             document.getElementById('rainMaxHour').textContent = data.dayStats.rainMaxHour.toFixed(1);
         }
