@@ -620,6 +620,8 @@
             weatherData.windSpeed += (Math.random() - 0.5) * 1;
             weatherData.windDirection = (weatherData.windDirection + (Math.random() - 0.5) * 5) % 360;
             weatherData.windGust += (Math.random() - 0.5) * 2;
+
+            weatherData.rainValue += (Math.random()) * 0.5;
             
             // Mettre à jour les stats du jour
             weatherData.dayStats.tempMin = Math.min(weatherData.dayStats.tempMin, weatherData.temperature);
