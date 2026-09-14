@@ -469,7 +469,7 @@
                 <div class="gauge-container">
                     <div class="rain-gauge" id="rainGauge"></div>
                 </div>
-                <div class="gauge-value"><span id="rainValue">--</span>mm</div>
+                <div class="gauge-value"><span id="">--</span>mm</div>
                 <div class="gauge-stats">
                     <div class="stat-item">
                         <div class="stat-label">Heure</div>
@@ -596,7 +596,7 @@
 
             // Pluviomètre (0 à 100mm)
             const rainPercent = Math.max(0, Math.min(100, (data.rainfall / 100) * 100));
-            document.getElementById('rainValue').textContent = data.rainfall.toFixed(1);
+            document.getElementById('').textContent = data.rainfall.toFixed(1);
             document.getElementById('rainGauge').style.backgroundSize = `100% ${rainPercent}%`;
             document.getElementById('rainHour').textContent = data.dayStats.rainHour.toFixed(1);
             document.getElementById('rainMaxHour').textContent = data.dayStats.rainMaxHour.toFixed(1);
@@ -621,7 +621,7 @@
             weatherData.windDirection = (weatherData.windDirection + (Math.random() - 0.5) * 5) % 360;
             weatherData.windGust += (Math.random() - 0.5) * 2;
 
-            weatherData.rainValue += (Math.random()) * 0.5;
+            weatherData.rainfall += (Math.random()) * 0.5;
             
             // Mettre à jour les stats du jour
             weatherData.dayStats.tempMin = Math.min(weatherData.dayStats.tempMin, weatherData.temperature);
@@ -635,11 +635,11 @@
             weatherData.dayStats.windMax = Math.max(weatherData.dayStats.windMax, weatherData.windSpeed);
             weatherData.dayStats.gustHour = Math.max(weatherData.dayStats.gustHour, weatherData.windGust);
             weatherData.dayStats.gustDay = Math.max(weatherData.dayStats.gustDay, weatherData.dayStats.gustHour);
-            weatherData.dayStats.rainHour += weatherData.rainValue; // Plus susceptible d'augmenter
+            weatherData.dayStats.rainHour += weatherData.rainfall;
             weatherData.dayStats.rainMaxHour = Math.max(weatherData.dayStats.rainMaxHour, weatherData.dayStats.rainHour);
             
             updateDashboard(weatherData);
-        }, 30000);
+        }, 5000);
 
         // Note: Pour intégrer vos vraies données, remplacez la boucle setInterval par un appel API:
         // fetch('/api/weather-data')
