@@ -143,6 +143,55 @@
             font-size: 0.9em;
         }
 
+        /* Intensité du Vent (Échelle de Beaufort) */
+        .wind-intensity-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .beaufort-bar {
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #ddd;
+        }
+
+        .beaufort-bar.active {
+            border-color: #667eea;
+        }
+
+        .beaufort-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            width: 0%;
+            transition: width 0.5s ease, background 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .beaufort-fill.danger {
+            background: linear-gradient(90deg, #ff9800, #f44336);
+        }
+
+        .beaufort-label {
+            font-size: 0.8em;
+            color: #666;
+            padding: 0 8px;
+            line-height: 30px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
         /* Pluviomètre */
         .rain-gauge {
             width: 120px;
@@ -332,6 +381,49 @@
                 </div>
             </div>
 
+            <!-- Intensité du Vent (Échelle de Beaufort) -->
+            <div class="gauge-card">
+                <div class="gauge-title">⚡ Intensité du Vent</div>
+                <div class="gauge-container">
+                    <div class="wind-intensity-scale">
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Calme</div>
+                            <div class="beaufort-fill" id="beaufort0" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Très léger</div>
+                            <div class="beaufort-fill" id="beaufort1" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Léger</div>
+                            <div class="beaufort-fill" id="beaufort2" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Faible</div>
+                            <div class="beaufort-fill" id="beaufort3" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Modéré</div>
+                            <div class="beaufort-fill" id="beaufort4" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Frais</div>
+                            <div class="beaufort-fill" id="beaufort5" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Fort</div>
+                            <div class="beaufort-fill" id="beaufort6" style="width: 0%"></div>
+                        </div>
+                        <div class="beaufort-bar">
+                            <div class="beaufort-label">Très fort</div>
+                            <div class="beaufort-fill" id="beaufort7" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gauge-value"><span id="beaufortValue">0</span> - <span id="beaufortLabel">Calme</span></div>
+                <div class="gauge-unit">Échelle de Beaufort</div>
+            </div>
+
             <!-- Pluviomètre -->
             <div class="gauge-card">
                 <div class="gauge-title">🌧️ Pluviomètre</div>
@@ -361,10 +453,6 @@
                 <div class="data-item-label">Vitesse Rafales</div>
                 <div class="data-item-value"><span id="gustsValue">--</span> km/h</div>
             </div>
-            <div class="data-item">
-                <div class="data-item-label">Indice UV</div>
-                <div class="data-item-value"><span id="uvIndexValue">--</span></div>
-            </div>
         </div>
     </div>
 
@@ -379,16 +467,36 @@
             rainfall: 3.5,
             feelsLike: 21.0,
             dewPoint: 14.5,
-            gusts: 25,
-            uvIndex: 5
+            gusts: 25
         };
 
         // Directions cardinales
         const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
 
+        // Échelle de Beaufort (km/h)
+        const beaufortScales = [
+            { name: 'Calme', maxSpeed: 1, description: '< 1 km/h' },
+            { name: 'Très léger', maxSpeed: 5, description: '1-5 km/h' },
+            { name: 'Léger', maxSpeed: 11, description: '6-11 km/h' },
+            { name: 'Faible', maxSpeed: 19, description: '12-19 km/h' },
+            { name: 'Modéré', maxSpeed: 28, description: '20-28 km/h' },
+            { name: 'Frais', maxSpeed: 38, description: '29-38 km/h' },
+            { name: 'Fort', maxSpeed: 49, description: '39-49 km/h' },
+            { name: 'Très fort', maxSpeed: 61, description: '50-61 km/h' }
+        ];
+
         function getWindDirection(degrees) {
             const index = Math.round(degrees / 22.5) % 16;
             return directions[index];
+        }
+
+        function getBeaufortScale(windSpeed) {
+            for (let i = beaufortScales.length - 1; i >= 0; i--) {
+                if (windSpeed >= beaufortScales[i].maxSpeed - (beaufortScales[i].maxSpeed - (i === 0 ? 0 : beaufortScales[i-1].maxSpeed))) {
+                    return i;
+                }
+            }
+            return 0;
         }
 
         function updateDashboard(data) {
@@ -416,6 +524,28 @@
             const windArrow = document.getElementById('windArrow');
             windArrow.style.transform = `rotate(${data.windDirection}deg)`;
 
+            // Intensité du Vent (Échelle de Beaufort)
+            const beaufortIndex = getBeaufortScale(data.windSpeed);
+            document.getElementById('beaufortValue').textContent = beaufortIndex;
+            document.getElementById('beaufortLabel').textContent = beaufortScales[beaufortIndex].name;
+
+            // Réinitialiser toutes les barres
+            for (let i = 0; i < beaufortScales.length; i++) {
+                const bar = document.getElementById(`beaufort${i}`);
+                if (i <= beaufortIndex) {
+                    bar.style.width = '100%';
+                    if (beaufortIndex >= 6) {
+                        bar.classList.add('danger');
+                    } else {
+                        bar.classList.remove('danger');
+                    }
+                } else {
+                    bar.style.width = '0%';
+                    bar.classList.remove('danger');
+                }
+                bar.parentElement.classList.toggle('active', i === beaufortIndex);
+            }
+
             // Pluviomètre (0 à 100mm)
             const rainPercent = Math.max(0, Math.min(100, (data.rainfall / 100) * 100));
             document.getElementById('rainValue').textContent = data.rainfall.toFixed(1);
@@ -425,7 +555,6 @@
             document.getElementById('feelsLikeValue').textContent = data.feelsLike.toFixed(1);
             document.getElementById('dewPointValue').textContent = data.dewPoint.toFixed(1);
             document.getElementById('gustsValue').textContent = data.gusts.toFixed(1);
-            document.getElementById('uvIndexValue').textContent = Math.round(data.uvIndex);
         }
 
         // Mise à jour initiale
