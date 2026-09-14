@@ -396,11 +396,11 @@
                         <div class="gauge-stats">
                             <div class="stat-item">
                                 <div class="stat-label">Min</div>
-                                <div class="stat-value"><span id="pressureMin">--</span></div>
+                                <div class="stat-value"><span id="pressureMin">--</span>hPa</div>
                             </div>
                             <div class="stat-item">
                                 <div class="stat-label">Max</div>
-                                <div class="stat-value"><span id="pressureMax">--</span></div>
+                                <div class="stat-value"><span id="pressureMax">--</span>hPa</div>
                             </div>
                         </div>
                     </div>
@@ -424,15 +424,15 @@
                         <div id="windDirection" class="wind-direction-text">N</div>
                     </div>
                 </div>
-                <div class="gauge-value"><span id="windSpeedValue">--</span></div>
+                <div class="gauge-value"><span id="windSpeedValue">--</span>km/h</div>
                 <div class="gauge-stats">
                     <div class="stat-item">
                         <div class="stat-label">Moy</div>
-                        <div class="stat-value"><span id="windAvg">--</span></div>
+                        <div class="stat-value"><span id="windAvg">--</span>km/h</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max</div>
-                        <div class="stat-value"><span id="windMax">--</span></div>
+                        <div class="stat-value"><span id="windMax">--</span>km/h</div>
                     </div>
                 </div>
             </div>
@@ -450,15 +450,15 @@
                         <circle cx="100" cy="100" r="6" fill="#667eea"/>
                     </svg>
                 </div>
-                <div class="gauge-value"><span id="windGustValue">--</span></div>
+                <div class="gauge-value"><span id="windGustValue">--</span>km/h</div>
                 <div class="gauge-stats">
                     <div class="stat-item">
                         <div class="stat-label">Heure</div>
-                        <div class="stat-value"><span id="gustHour">--</span></div>
+                        <div class="stat-value"><span id="gustHour">--</span>km/h</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Jour</div>
-                        <div class="stat-value"><span id="gustDay">--</span></div>
+                        <div class="stat-value"><span id="gustDay">--</span>km/h</div>
                     </div>
                 </div>
             </div>
@@ -469,15 +469,15 @@
                 <div class="gauge-container">
                     <div class="rain-gauge" id="rainGauge"></div>
                 </div>
-                <div class="gauge-value"><span id="rainValue">--</span></div>
+                <div class="gauge-value"><span id="rainValue">--</span>mm</div>
                 <div class="gauge-stats">
                     <div class="stat-item">
                         <div class="stat-label">Heure</div>
-                        <div class="stat-value"><span id="rainHour">--</span></div>
+                        <div class="stat-value"><span id="rainHour">--</span>mm/h</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Max h</div>
-                        <div class="stat-value"><span id="rainMaxHour">--</span></div>
+                        <div class="stat-value"><span id="rainMaxHour">--</span>mm/h</div>
                     </div>
                 </div>
             </div>
@@ -500,20 +500,20 @@
             gusts: 25,
             // Statistiques du jour
             dayStats: {
-                tempMin: 18.5,
-                tempMax: 26.3,
-                tempRMin: 2.0,
-                tempRMax: 38.0,
-                humidityMin: 45,
-                humidityMax: 78,
-                pressureMin: 1008,
-                pressureMax: 1015,
-                windAvg: 12,
-                windMax: 35,
-                gustHour: 28,
-                gustDay: 32,
-                rainHour: 2.5,
-                rainMaxHour: 5.2
+                tempMin: 999.0,
+                tempMax: -999.0,
+                tempRMin: 999.0,
+                tempRMax: -999.0,
+                humidityMin: 100,
+                humidityMax: 0,
+                pressureMin: 1100.0,
+                pressureMax: 900.0,
+                windAvg: 0.0,
+                windMax: 0.0,
+                gustHour: 0.0,
+                gustDay: 0.0,
+                rainHour: 0.0,
+                rainMaxHour: 0.0
             }
         };
 
