@@ -621,7 +621,8 @@
             weatherData.windDirection = (weatherData.windDirection + (Math.random() - 0.5) * 5) % 360;
             weatherData.windGust += (Math.random() - 0.5) * 2;
 
-            weatherData.rainfall += (Math.random()) * 0.5;
+            const rainIncrement = Math.random() * 0.5;
+            weatherData.rainfall += rainIncrement;
             
             // Mettre à jour les stats du jour
             weatherData.dayStats.tempMin = Math.min(weatherData.dayStats.tempMin, weatherData.temperature);
@@ -635,7 +636,7 @@
             weatherData.dayStats.windMax = Math.max(weatherData.dayStats.windMax, weatherData.windSpeed);
             weatherData.dayStats.gustHour = Math.max(weatherData.dayStats.gustHour, weatherData.windGust);
             weatherData.dayStats.gustDay = Math.max(weatherData.dayStats.gustDay, weatherData.dayStats.gustHour);
-            weatherData.dayStats.rainHour += weatherData.rainfall;
+            weatherData.dayStats.rainHour += rainIncrement;
             weatherData.dayStats.rainMaxHour = Math.max(weatherData.dayStats.rainMaxHour, weatherData.dayStats.rainHour);
             
             updateDashboard(weatherData);
