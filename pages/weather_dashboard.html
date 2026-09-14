@@ -48,9 +48,9 @@
             opacity: 0.8;
         }
 
-        .dashboard-grid {
+        .dashboard-row {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -258,13 +258,13 @@
 
         /* Responsive */
         @media (max-width: 1400px) {
-            .dashboard-grid {
+            .dashboard-row {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
+            .dashboard-row {
                 grid-template-columns: repeat(2, 1fr);
             }
 
@@ -296,7 +296,8 @@
 
         <div id="errorMessage"></div>
 
-        <div class="dashboard-grid">
+        <!-- Ligne 1: Température, Humidité, Pression atmosphérique -->
+        <div class="dashboard-row">
             <!-- Thermomètre -->
             <div class="gauge-card">
                 <div class="gauge-title">🌡️ Température</div>
@@ -393,7 +394,10 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Ligne 2: Vent, Rafale, Pluie -->
+        <div class="dashboard-row">
             <!-- Anémomètre -->
             <div class="gauge-card">
                 <div class="gauge-title">💨 Vent</div>
@@ -414,10 +418,30 @@
                         <div class="stat-value"><span id="windMax">--</span></div>
                     </div>
                 </div>
-                <div class="gauge-stats" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">
-                    <div class="stat-item" style="grid-column: 1 / -1;">
-                        <div class="stat-label">Rafale</div>
-                        <div class="stat-value"><span id="windGust">--</span></div>
+            </div>
+
+            <!-- Rafale -->
+            <div class="gauge-card">
+                <div class="gauge-title">🌪️ Rafale</div>
+                <div class="gauge-container">
+                    <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
+                        <!-- Cercle de fond -->
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#ddd" stroke-width="2"/>
+                        <!-- Indicateur radial -->
+                        <line class="barometer-needle" x1="100" y1="100" x2="100" y2="20" stroke="#667eea" stroke-width="3" stroke-linecap="round"/>
+                        <!-- Centre -->
+                        <circle cx="100" cy="100" r="6" fill="#667eea"/>
+                    </svg>
+                </div>
+                <div class="gauge-value"><span id="windGustValue">--</span></div>
+                <div class="gauge-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Heure</div>
+                        <div class="stat-value"><span id="gustHour">--</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Jour</div>
+                        <div class="stat-value"><span id="gustDay">--</span></div>
                     </div>
                 </div>
             </div>
@@ -467,6 +491,8 @@
                 pressureMax: 1015,
                 windAvg: 12,
                 windMax: 35,
+                gustHour: 28,
+                gustDay: 32,
                 rainHour: 2.5,
                 rainMaxHour: 5.2
             }
@@ -508,7 +534,7 @@
             // Baromètre (900 à 1050 mb)
             const pressurePercent = ((data.pressure - 900) / 150) * 180;
             document.getElementById('pressureValue').textContent = Math.round(data.pressure);
-            document.querySelector('.barometer-needle').style.transform = `rotate(${pressurePercent - 90}deg)`;
+            document.querySelectorAll('.barometer-needle')[0].style.transform = `rotate(${pressurePercent - 90}deg)`;
             document.getElementById('pressureMin').textContent = data.dayStats.pressureMin;
             document.getElementById('pressureMax').textContent = data.dayStats.pressureMax;
 
@@ -537,10 +563,16 @@
             document.getElementById('windDirection').textContent = getWindDirection(data.windDirection);
             document.getElementById('windAvg').textContent = data.dayStats.windAvg.toFixed(1);
             document.getElementById('windMax').textContent = data.dayStats.windMax.toFixed(1);
-            document.getElementById('windGust').textContent = data.windGust.toFixed(1);
             
             const windArrow = document.getElementById('windArrow');
             windArrow.style.transform = `rotate(${data.windDirection}deg)`;
+
+            // Rafale
+            const gustPercent = ((data.windGust) / 50) * 180;
+            document.getElementById('windGustValue').textContent = data.windGust.toFixed(1);
+            document.querySelectorAll('.barometer-needle')[1].style.transform = `rotate(${gustPercent - 90}deg)`;
+            document.getElementById('gustHour').textContent = data.dayStats.gustHour.toFixed(1);
+            document.getElementById('gustDay').textContent = data.dayStats.gustDay.toFixed(1);
 
             // Pluviomètre (0 à 100mm)
             const rainPercent = Math.max(0, Math.min(100, (data.rainfall / 100) * 100));
@@ -576,6 +608,8 @@
             weatherData.dayStats.pressureMin = Math.min(weatherData.dayStats.pressureMin, weatherData.pressure);
             weatherData.dayStats.pressureMax = Math.max(weatherData.dayStats.pressureMax, weatherData.pressure);
             weatherData.dayStats.windMax = Math.max(weatherData.dayStats.windMax, weatherData.windSpeed);
+            weatherData.dayStats.gustHour = Math.max(weatherData.dayStats.gustHour, weatherData.windGust);
+            weatherData.dayStats.gustDay = Math.max(weatherData.dayStats.gustDay, weatherData.dayStats.gustHour);
             weatherData.dayStats.rainHour += (Math.random() - 0.8) * 0.1; // Plus susceptible d'augmenter
             weatherData.dayStats.rainMaxHour = Math.max(weatherData.dayStats.rainMaxHour, weatherData.dayStats.rainHour);
             
