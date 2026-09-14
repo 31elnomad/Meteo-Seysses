@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Météo - Seysses</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .update-time {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .gauge-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .gauge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .gauge-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+
+        svg {
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+        }
+
+        .gauge-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 15px;
+        }
+
+        .gauge-unit {
+            font-size: 1em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .gauge-range {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Thermomètre */
+        .thermometer-fill {
+            transition: height 0.5s ease;
+        }
+
+        /* Hygromètre */
+        .hygrometer-fill {
+            transition: height 0.5s ease;
+        }
+
+        /* Baromètre */
+        .barometer-needle {
+            transform-origin: 50% 100%;
+            transition: transform 0.5s ease;
+        }
+
+        /* Anémomètre */
+        .wind-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .wind-arrow {
+            font-size: 3em;
+            transition: transform 0.5s ease;
+        }
+
+        .wind-direction-text {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Pluviomètre */
+        .rain-gauge {
+            width: 120px;
+            height: 150px;
+            margin: 0 auto;
+            border: 3px solid #667eea;
+            border-radius: 5px;
+            position: relative;
+            background: linear-gradient(to top, #667eea, #667eea) no-repeat bottom;
+            background-size: 100% 0%;
+            transition: background-size 0.5s ease;
+        }
+
+        .rain-gauge::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background: #667eea;
+        }
+
+        /* States de couleur */
+        .status-good {
+            color: #4caf50;
+        }
+
+        .status-warning {
+            color: #ff9800;
+        }
+
+        .status-critical {
+            color: #f44336;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-item {
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .data-item-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .data-item-value {
+            font-size: 1.8em;
+            color: #333;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌤️ Météo Seysses</h1>
+            <p>Dashboard Temps Réel</p>
+        </div>
+
+        <div class="update-time">
+            Dernière mise à jour: <span id="updateTime">--:--:--</span>
+        </div>
+
+        <div id="errorMessage"></div>
+
+        <div class="dashboard-grid">
+            <!-- Thermomètre -->
+            <div class="gauge-card">
+                <div class="gauge-title">🌡️ Thermomètre</div>
+                <div class="gauge-container">
+                    <svg viewBox="0 0 200 240" style="width: 100%; height: 100%;">
+                        <!-- Fond du thermomètre -->
+                        <path d="M 70 20 L 70 150 Q 70 180 100 180 Q 130 180 130 150 L 130 20 Z" fill="none" stroke="#ddd" stroke-width="3"/>
+                        <!-- Remplissage -->
+                        <path class="thermometer-fill" d="M 75 140 L 75 150 Q 75 175 100 175 Q 125 175 125 150 L 125 140 Z" fill="#ff5722" stroke="none"/>
+                        <!-- Bulbe -->
+                        <circle cx="100" cy="195" r="25" fill="none" stroke="#ddd" stroke-width="3"/>
+                        <circle class="thermometer-fill" cx="100" cy="195" r="22" fill="#ff5722" stroke="none"/>
+                    </svg>
+                </div>
+                <div class="gauge-value"><span id="tempValue">--</span>°C</div>
+                <div class="gauge-unit">Température</div>
+                <div class="gauge-range">
+                    <span>-30°C</span>
+                    <span>50°C</span>
+                </div>
+            </div>
+
+            <!-- Hygromètre -->
+            <div class="gauge-card">
+                <div class="gauge-title">💧 Hygromètre</div>
+                <div class="gauge-container">
+                    <svg viewBox="0 0 200 240" style="width: 100%; height: 100%;">
+                        <!-- Conteneur -->
+                        <rect x="60" y="20" width="80" height="160" rx="10" fill="none" stroke="#ddd" stroke-width="3"/>
+                        <!-- Remplissage -->
+                        <rect class="hygrometer-fill" x="65" y="160" width="70" height="10" rx="3" fill="#2196F3" stroke="none"/>
+                        <!-- Gouttes décoratives -->
+                        <path d="M 100 80 Q 95 75 95 70 Q 95 65 100 65 Q 105 65 105 70 Q 105 75 100 80 Z" fill="#2196F3" opacity="0.3"/>
+                        <path d="M 75 120 Q 70 115 70 110 Q 70 105 75 105 Q 80 105 80 110 Q 80 115 75 120 Z" fill="#2196F3" opacity="0.3"/>
+                        <path d="M 125 120 Q 120 115 120 110 Q 120 105 125 105 Q 130 105 130 110 Q 130 115 125 120 Z" fill="#2196F3" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="gauge-value"><span id="humidityValue">--</span>%</div>
+                <div class="gauge-unit">Humidité Relative</div>
+                <div class="gauge-range">
+                    <span>0%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+
+            <!-- Baromètre -->
+            <div class="gauge-card">
+                <div class="gauge-title">📊 Baromètre</div>
+                <div class="gauge-container">
+                    <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
+                        <!-- Cadran -->
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#ddd" stroke-width="2"/>
+                        <!-- Graduations -->
+                        <g stroke="#ccc" stroke-width="1">
+                            <line x1="100" y1="15" x2="100" y2="25"/>
+                            <line x1="170" y1="100" x2="160" y2="100"/>
+                            <line x1="100" y1="185" x2="100" y2="175"/>
+                            <line x1="30" y1="100" x2="40" y2="100"/>
+                        </g>
+                        <!-- Aiguille -->
+                        <line class="barometer-needle" x1="100" y1="100" x2="100" y2="40" stroke="#667eea" stroke-width="3" stroke-linecap="round"/>
+                        <!-- Centre -->
+                        <circle cx="100" cy="100" r="6" fill="#667eea"/>
+                        <!-- Texte -->
+                        <text x="100" y="160" text-anchor="middle" font-size="12" fill="#666">mb</text>
+                    </svg>
+                </div>
+                <div class="gauge-value"><span id="pressureValue">--</span></div>
+                <div class="gauge-unit">Pression (mb)</div>
+                <div class="gauge-range">
+                    <span>900 mb</span>
+                    <span>1050 mb</span>
+                </div>
+            </div>
+
+            <!-- Anémomètre -->
+            <div class="gauge-card">
+                <div class="gauge-title">💨 Anémomètre</div>
+                <div class="gauge-container">
+                    <div class="wind-indicator">
+                        <div class="wind-arrow" id="windArrow">↑</div>
+                        <div id="windDirection" class="wind-direction-text">N</div>
+                    </div>
+                </div>
+                <div class="gauge-value"><span id="windSpeedValue">--</span> km/h</div>
+                <div class="gauge-unit">Vitesse du Vent</div>
+                <div class="gauge-range">
+                    <span>0 km/h</span>
+                    <span>100+ km/h</span>
+                </div>
+            </div>
+
+            <!-- Pluviomètre -->
+            <div class="gauge-card">
+                <div class="gauge-title">🌧️ Pluviomètre</div>
+                <div class="gauge-container">
+                    <div class="rain-gauge" id="rainGauge"></div>
+                </div>
+                <div class="gauge-value"><span id="rainValue">--</span> mm</div>
+                <div class="gauge-unit">Précipitations</div>
+                <div class="gauge-range">
+                    <span>0 mm</span>
+                    <span>100+ mm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Données détaillées -->
+        <div class="data-row">
+            <div class="data-item">
+                <div class="data-item-label">Température Ressentie</div>
+                <div class="data-item-value"><span id="feelsLikeValue">--</span>°C</div>
+            </div>
+            <div class="data-item">
+                <div class="data-item-label">Point de Rosée</div>
+                <div class="data-item-value"><span id="dewPointValue">--</span>°C</div>
+            </div>
+            <div class="data-item">
+                <div class="data-item-label">Vitesse Rafales</div>
+                <div class="data-item-value"><span id="gustsValue">--</span> km/h</div>
+            </div>
+            <div class="data-item">
+                <div class="data-item-label">Indice UV</div>
+                <div class="data-item-value"><span id="uvIndexValue">--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données d'exemple - À remplacer par vos vraies données
+        const weatherData = {
+            temperature: 22.5,
+            humidity: 65,
+            pressure: 1013,
+            windSpeed: 15,
+            windDirection: 120, // en degrés (0=N, 90=E, 180=S, 270=W)
+            rainfall: 3.5,
+            feelsLike: 21.0,
+            dewPoint: 14.5,
+            gusts: 25,
+            uvIndex: 5
+        };
+
+        // Directions cardinales
+        const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+
+        function getWindDirection(degrees) {
+            const index = Math.round(degrees / 22.5) % 16;
+            return directions[index];
+        }
+
+        function updateDashboard(data) {
+            // Mise à jour de l'heure
+            const now = new Date();
+            document.getElementById('updateTime').textContent = now.toLocaleTimeString('fr-FR');
+
+            // Thermomètre (-30 à 50°C)
+            const tempPercent = ((data.temperature + 30) / 80) * 100;
+            document.getElementById('tempValue').textContent = data.temperature.toFixed(1);
+            document.querySelector('.thermometer-fill').style.height = Math.max(0, Math.min(100, tempPercent)) + '%';
+
+            // Hygromètre (0 à 100%)
+            document.getElementById('humidityValue').textContent = Math.round(data.humidity);
+            document.querySelector('.hygrometer-fill').style.height = Math.max(0, Math.min(100, data.humidity)) + '%';
+
+            // Baromètre (900 à 1050 mb)
+            const pressurePercent = ((data.pressure - 900) / 150) * 180;
+            document.getElementById('pressureValue').textContent = Math.round(data.pressure);
+            document.querySelector('.barometer-needle').style.transform = `rotate(${pressurePercent - 90}deg)`;
+
+            // Anémomètre
+            document.getElementById('windSpeedValue').textContent = data.windSpeed.toFixed(1);
+            document.getElementById('windDirection').textContent = getWindDirection(data.windDirection);
+            const windArrow = document.getElementById('windArrow');
+            windArrow.style.transform = `rotate(${data.windDirection}deg)`;
+
+            // Pluviomètre (0 à 100mm)
+            const rainPercent = Math.max(0, Math.min(100, (data.rainfall / 100) * 100));
+            document.getElementById('rainValue').textContent = data.rainfall.toFixed(1);
+            document.getElementById('rainGauge').style.backgroundSize = `100% ${rainPercent}%`;
+
+            // Données détaillées
+            document.getElementById('feelsLikeValue').textContent = data.feelsLike.toFixed(1);
+            document.getElementById('dewPointValue').textContent = data.dewPoint.toFixed(1);
+            document.getElementById('gustsValue').textContent = data.gusts.toFixed(1);
+            document.getElementById('uvIndexValue').textContent = Math.round(data.uvIndex);
+        }
+
+        // Mise à jour initiale
+        updateDashboard(weatherData);
+
+        // Mise à jour automatique toutes les 30 secondes
+        setInterval(() => {
+            // Simuler une variation légère des données
+            weatherData.temperature += (Math.random() - 0.5) * 0.5;
+            weatherData.humidity += (Math.random() - 0.5) * 2;
+            weatherData.pressure += (Math.random() - 0.5) * 0.5;
+            weatherData.windSpeed += (Math.random() - 0.5) * 1;
+            weatherData.windDirection = (weatherData.windDirection + (Math.random() - 0.5) * 5) % 360;
+            
+            updateDashboard(weatherData);
+        }, 30000);
+
+        // Note: Pour intégrer vos vraies données, remplacez la boucle setInterval par un appel API:
+        // fetch('/api/weather-data')
+        //     .then(response => response.json())
+        //     .then(data => updateDashboard(data));
+    </script>
+</body>
+</html>
