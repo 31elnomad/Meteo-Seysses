@@ -495,7 +495,7 @@
             windSpeed: 15,
             windDirection: 120, // en degrés (0=N, 90=E, 180=S, 270=W)
             windGust: 22, // Rafale instantanée
-            rainfall: 3.5,
+            rainfall: 0.0,
             dewPoint: 14.5,
             gusts: 25,
             // Statistiques du jour
@@ -635,7 +635,7 @@
             weatherData.dayStats.windMax = Math.max(weatherData.dayStats.windMax, weatherData.windSpeed);
             weatherData.dayStats.gustHour = Math.max(weatherData.dayStats.gustHour, weatherData.windGust);
             weatherData.dayStats.gustDay = Math.max(weatherData.dayStats.gustDay, weatherData.dayStats.gustHour);
-            weatherData.dayStats.rainHour += (Math.random() - 0.8) * 0.1; // Plus susceptible d'augmenter
+            weatherData.dayStats.rainHour += weatherData.rainValue; // Plus susceptible d'augmenter
             weatherData.dayStats.rainMaxHour = Math.max(weatherData.dayStats.rainMaxHour, weatherData.dayStats.rainHour);
             
             updateDashboard(weatherData);
