@@ -74,7 +74,7 @@ def get_measures_between(start, end, scale="5min"):
 
     tables = {}
     for dev in devices:
-        print(dev.get("modules", []))
+        print('ok', dev.get("modules", []))
         quit()
         modules = [(dev["module_name"], dev["type"], None)] + \
                   [(m["module_name"], m["type"], m["_id"]) for m in dev.get("modules", [])]
