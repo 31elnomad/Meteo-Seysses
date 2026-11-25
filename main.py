@@ -5,10 +5,8 @@ import json
 from scripts.getdata_ import get_access_token, get_station_data
 from scripts.getdata_2 import get_measures_between
 
-data = get_measures_between("2026-11-25", "2026-11-25 12:00")
-
 if __name__ == "__main__":
-    data = get_measures_between("2026-11-18", "2026-11-25 12:00")
+    data = get_measures_between("2026-11-25", "2026-11-25 12:00")
     for module, df in data.items():
         print(f"\n{module} : {len(df)} mesures")
         print(df.head(3))
