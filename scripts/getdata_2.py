@@ -85,7 +85,7 @@ def get_measures_between(start, end, scale="5min"):
 
     tables = {}
     for dev in devices:
-        modules = [(dev["module_name"], dev["type"], None)] + \
+        modules = [(dev["type"], None)] + \
                   [(m["type"], m["_id"]) for m in dev.get("modules", [])]
         for mtype, module_id in modules:
             if mtype not in TYPES:
