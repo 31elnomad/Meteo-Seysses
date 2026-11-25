@@ -25,7 +25,8 @@ def get_station_data():
 
     r = requests.get(
         "https://api.netatmo.com/api/getstationsdata",
-        headers=headers
+        headers=headers,
+        timeout=30
     )
     r.raise_for_status()
     return r.json()
