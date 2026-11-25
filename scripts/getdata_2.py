@@ -1,20 +1,75 @@
+import os
 import time
-import pandas as pd
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import pandas as pd
+import requests
+
+PARIS = ZoneInfo("Europe/Paris")
+
+TYPES = {
+    "NAMain":    "Temperature,Humidity,CO2,Pressure,Noise",           # station intérieure
+    "NAModule1": "Temperature,Humidity",                              # module extérieur
+    "NAModule2": "WindStrength,WindAngle,GustStrength,GustAngle",     # anémomètre
+    "NAModule3": "Rain",                                              # pluviomètre
+    "NAModule4": "Temperature,Humidity,CO2",                          # module intérieur
+}
+
+_access_token = None
 
 
-def get_measures_between(start, end, scale="5min"):
+def get_access_token():
+    """Renouvelle le jeton une seule fois par lancement.
+    Netatmo renvoie un NOUVEAU refresh token : on l'enregistre dans new_refresh_token.txt,
+    à recopier dans la variable REFRESH_TOKEN (sinon l'ancien finit par ne plus marcher)."""
+    global _access_token
+    if _access_token:
+        return _access_token
+
+    payload = {
+        "grant_type": "refresh_token",
+        "client_id": os.environ["CLIENT_ID"],
+        "client_secret": os.environ["CLIENT_SECRET"],
+        "refresh_token": os.environ["REFRESH_TOKEN"],
+    }
+    r = requests.post("https://api.netatmo.com/oauth2/token", data=payload, timeout=30)
+    r.raise_for_status()
+    tok = r.json()
+
+    new = tok.get("refresh_token")
+    if new and new != os.environ["REFRESH_TOKEN"]:
+        with open("new_refresh_token.txt", "w") as f:
+            f.write(new)
+        os.environ["REFRESH_TOKEN"] = new
+        print("Nouveau refresh token enregistré dans new_refresh_token.txt "
+              "(mets-le dans REFRESH_TOKEN pour le prochain lancement)")
+
+    _access_token = tok["access_token"]
+    return _access_token
+
+
+def get_station_data():
+    headers = {"Authorization": f"Bearer {get_access_token()}"}
+    r = requests.get("https://api.netatmo.com/api/getstationsdata",
+                     headers=headers, timeout=30)
+    r.raise_for_status()
+    return r.json()
+
+
+def to_ts(d):
+    """'2026-11-18' ou '2026-11-18 14:30' (heure de Paris) -> secondes UTC."""
+    if isinstance(d, str):
+        d = datetime.strptime(d, "%Y-%m-%d %H:%M" if " " in d else "%Y-%m-%d")
+    return int((d.replace(tzinfo=PARIS) if d.tzinfo is None else d).timestamp())
+
+
+def get_measures_between(start, end, scale="max"):
     """Toutes les mesures entre `start` et `end` (heure de Paris), pour chaque module.
     scale : "max" (brut, ~5 min), "30min", "1hour", "3hours", "1day".
     Renvoie {nom du module: DataFrame indexé par l'heure de Paris}."""
-    def to_ts(d):
-        if isinstance(d, str):
-            d = datetime.strptime(d, "%Y-%m-%d %H:%M" if " " in d else "%Y-%m-%d")
-        return int((d.replace(tzinfo=PARIS) if d.tzinfo is None else d).timestamp())
     t0, t1 = to_ts(start), to_ts(end)
-
-    access_token = get_access_token()
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = {"Authorization": f"Bearer {get_access_token()}"}
     devices = get_station_data()["body"]["devices"]
 
     tables = {}
@@ -50,11 +105,3 @@ def get_measures_between(start, end, scale="5min"):
             df.index.name = "heure"
             tables[name] = df
     return tables
-
-
-if __name__ == "__main__":
-    data = get_measures_between("2026-11-18", "2026-11-25 12:00")
-    for module, df in data.items():
-        print(f"\n{module} : {len(df)} mesures")
-        print(df.head(3))
-        df.to_csv(f"netatmo_{module}.csv")
