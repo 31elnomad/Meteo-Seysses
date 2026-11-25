@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-import datetime
+from datetime import datetime
 
 
 def get_measures_between(start, end, scale="5min"):
