@@ -49,11 +49,22 @@ def get_access_token():
     return _access_token
 
 
+def netatmo_get(url, headers, params=None, tries=4):        # <-- NOUVELLE FONCTION ICI
+    """GET avec nouvelles tentatives si Netatmo est surchargé (429, 500, 502, 503)."""
+    for i in range(tries):
+        r = requests.get(url, headers=headers, params=params, timeout=60)
+        if r.status_code not in (429, 500, 502, 503):
+            r.raise_for_status()
+            return r
+        wait = 30 * (i + 1)
+        print(f"Netatmo répond {r.status_code}, nouvel essai dans {wait} s")
+        time.sleep(wait)
+    r.raise_for_status()
+
+
 def get_station_data():
     headers = {"Authorization": f"Bearer {get_access_token()}"}
-    r = requests.get("https://api.netatmo.com/api/getstationsdata",
-                     headers=headers, timeout=30)
-    r.raise_for_status()
+    r = netatmo_get("https://api.netatmo.com/api/getstationsdata", headers)   # <-- modifié
     return r.json()
 
 
