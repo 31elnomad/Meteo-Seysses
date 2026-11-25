@@ -64,7 +64,7 @@ def to_ts(d):
     return int((d.replace(tzinfo=PARIS) if d.tzinfo is None else d).timestamp())
 
 
-def get_measures_between(start, end, scale="max"):
+def get_measures_between(start, end, scale="5min"):
     """Toutes les mesures entre `start` et `end` (heure de Paris), pour chaque module.
     scale : "max" (brut, ~5 min), "30min", "1hour", "3hours", "1day".
     Renvoie {nom du module: DataFrame indexé par l'heure de Paris}."""
@@ -74,6 +74,8 @@ def get_measures_between(start, end, scale="max"):
 
     tables = {}
     for dev in devices:
+        print(dev.get("modules", []))
+        quit()
         modules = [(dev["module_name"], dev["type"], None)] + \
                   [(m["module_name"], m["type"], m["_id"]) for m in dev.get("modules", [])]
         for name, mtype, module_id in modules:
