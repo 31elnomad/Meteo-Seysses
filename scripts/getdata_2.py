@@ -9,7 +9,7 @@ import requests
 PARIS = ZoneInfo("Europe/Paris")
 
 TYPES = {
-    "NAMain":    "Temperature,Humidity,CO2,Pressure,Noise",           # station intérieure
+    "NAMain":    "Pressure",           # station intérieure
     "NAModule1": "Temperature,Humidity",                              # module extérieur
     "NAModule2": "WindStrength,WindAngle,GustStrength,GustAngle",     # anémomètre
     "NAModule3": "Rain",                                              # pluviomètre
