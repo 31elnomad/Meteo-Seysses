@@ -11,7 +11,7 @@ if __name__ == "__main__":
     for module, df in data.items():
         print(f"\n{module} : {len(df)} mesures")
         print(df.head(3))
-        df.to_csv(f"netatmo_{module}.csv")
+        df.to_csv(f"data/netatmo_{module}.csv")
 
 """station = b['body']['devices'][0]
 
