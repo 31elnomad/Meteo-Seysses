@@ -3,6 +3,12 @@ name: Netatmo
 on:
   workflow_dispatch:
 
+permissions:                                  # NOUVEAU : autorise le workflow à pousser des fichiers
+  contents: write
+
+concurrency:                                  # NOUVEAU : jamais deux lancements en même temps
+  group: netatmo
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -23,3 +29,25 @@ jobs:
       - run: pip install -r requirements.txt
 
       - run: python main.py
+
+      # NOUVEAU : enregistre le nouveau refresh token Netatmo dans les secrets
+      - name: Mettre à jour le refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -s new_refresh_token.txt ]; then
+            gh secret set REFRESH_TOKEN --repo "${{ github.repository }}" < new_refresh_token.txt
+            rm new_refresh_token.txt
+            echo "secret REFRESH_TOKEN mis à jour"
+          fi
+
+      # NOUVEAU : committe les CSV du dossier data/ dans le dépôt
+      - name: Enregistrer les données dans le dépôt
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet && echo "rien de nouveau" && exit 0
+          git commit -m "Données Netatmo du $(date -u +%Y-%m-%d)"
+          git push
