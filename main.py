@@ -6,7 +6,8 @@ from scripts.getdata_ import get_access_token, get_station_data
 from scripts.getdata_2 import get_measures_between
 
 if __name__ == "__main__":
-    data = get_measures_between("2026-11-25", "2026-11-25 12:00")
+    os.makedirs("data", exist_ok=True) 
+    data = get_measures_between("2026-11-25", "2026-11-25 23:59")
     for module, df in data.items():
         print(f"\n{module} : {len(df)} mesures")
         print(df.head(3))
