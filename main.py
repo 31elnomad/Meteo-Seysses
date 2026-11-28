@@ -24,8 +24,8 @@ def wind_chill(table):
     v16 = np.power(table['WindStrength'], 0.16)
     wc = 13.12 + 0.6215 * table['Temperature'] - 11.37 * v16 + 0.3965 * table['Temperature'] * v16
     wc = np.where((table['Temperature'] <= 10) & (table['WindStrength'] > 4.8), wc, table['Temperature'])
-    print(wc)
-    quit()
+    table['Windchill'] = round(wc,1)
+    return table
 
 def save_day(day):
     """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
@@ -53,6 +53,7 @@ def save_day(day):
     table.index.name = "heure"
 
     table = dewpoint(table)
+    table = wind_chill(table)
  
     folder = os.path.join("data", f"{day:%Y}", f"{day:%m}")
     os.makedirs(folder, exist_ok=True)
