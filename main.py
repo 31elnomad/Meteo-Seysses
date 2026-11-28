@@ -15,7 +15,7 @@ def dewpoint(table):
     b, c = 17.62, 243.12
     g = np.log(table['Humidity'] / 100) + b * table['Temperature'] / (c + table['Temperature'])
     dp = c * g / (b - g)
-    table['Dew_point'] = dp
+    table['Dew_point'] = round(dp,1)
     return table
 
 def save_day(day):
