@@ -34,7 +34,7 @@ def save_day(day):
     table = pd.concat(columns, axis=1, sort=True)
     table.index.name = "heure"
  
-    folder = os.path.join(DATA, f"{day:%Y}", f"{day:%m}")
+    folder = os.path.join("data", f"{day:%Y}", f"{day:%m}")
     os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, f"{day:%Y-%m-%d}.csv")
     table.to_csv(path, float_format="%.6g")
@@ -50,7 +50,6 @@ def clean(name):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    os.makedirs("data", exist_ok=True)
     if not args:
         days = [datetime.now(PARIS).date() - timedelta(days=1)]          # la veille
     elif len(args) == 1:
