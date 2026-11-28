@@ -74,7 +74,17 @@ def to_ts(d):
         d = datetime.strptime(d, "%Y-%m-%d %H:%M" if " " in d else "%Y-%m-%d")
     return int((d.replace(tzinfo=PARIS) if d.tzinfo is None else d).timestamp())
 
-
+def windir(table):
+    # direction du vent en toutes lettres (16 secteurs)
+    SECTEURS = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"]
+    for c in [c for c in table.columns if c.endswith("WindAngle") or c.endswith("GustAngle")]:
+        a = table[c]
+        secteur = ((a % 360 + 11.25) // 22.5 % 16)
+        table[c] = secteur.map(lambda i: SECTEURS[int(i)] if pd.notna(i) else "")
+        table.loc[a < 0, c + "_dir"] = ""
+    return table
+        
 def get_measures_between(start, end, scale="5min"):
     """Toutes les mesures entre `start` et `end` (heure de Paris), pour chaque module.
     scale : "max" (brut, ~5 min), "30min", "1hour", "3hours", "1day".
@@ -118,5 +128,7 @@ def get_measures_between(start, end, scale="5min"):
             tables[name] = df
             if name in ['NAModule3']:
                 tables[name] = tables[name].round(1)
+            elif name in ['NAModule2']:
+                tables[name] = windir(tables[name])
             print(tables[name])
     return tables
