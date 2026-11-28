@@ -31,13 +31,14 @@ def save_day(day):
     """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
     start = datetime(day.year, day.month, day.day, tzinfo=PARIS)
     end = start + timedelta(days=1)
-    tables = get_measures_between(start, end)
+    tables = get_measures_between(start - timedelta(days=1), end)
  
     columns = []
     for module, df in tables.items():
         if df.empty:
             continue
-        df = df[(df.index >= start) & (df.index < end)].copy()
+        #df = df[(df.index >= start) & (df.index < end)].copy()
+        df = df[df.index < end].copy()          # on garde la veille pour les cumuls
         df.columns = [f"{c}" for c in df.columns]
         # on garde les heures de Netatmo (xx:x2:30, xx:x7:30...) en les arrondissant à la minute
         # pour que les modules tombent sur la même ligne même avec quelques secondes d'écart
@@ -51,6 +52,14 @@ def save_day(day):
         return
     table = pd.concat(columns, axis=1, sort=True)
     table.index.name = "heure"
+    # cumuls de pluie glissants (mm tombés pendant les N dernières heures)
+    for c in [c for c in table.columns if c.endswith("Rain")]:
+        r = table[c].fillna(0)
+        for h in (1, 3, 6, 12, 24):
+            table[f"{c}_{h}h"] = r.rolling(f"{h}h").sum().round(1)
+        table[c] = table[c].round(1)
+
+    table = table[table.index >= start] 
 
     table = dewpoint(table)
     table = wind_chill(table)
