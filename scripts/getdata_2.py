@@ -116,4 +116,5 @@ def get_measures_between(start, end, scale="5min"):
             df.index = pd.to_datetime(df.index, unit="s", utc=True).tz_convert(PARIS)
             df.index.name = "heure"
             tables[name] = df
+            print(tables[name])
     return tables
