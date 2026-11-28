@@ -15,7 +15,7 @@ def dewpoint(table):
     b, c = 17.62, 243.12
     g = np.log(table['Humidity'] / 100) + b * table['Temperature'] / (c + table['Temperature'])
     dp = c * g / (b - g)
-    table['Dew_point'] = round(dp,1)
+    table['Dew_point'] = np.round(dp,1)
     return table
 
 def wind_chill(table):
@@ -24,7 +24,7 @@ def wind_chill(table):
     v16 = np.power(table['WindStrength'], 0.16)
     wc = 13.12 + 0.6215 * table['Temperature'] - 11.37 * v16 + 0.3965 * table['Temperature'] * v16
     wc = np.where((table['Temperature'] <= 10) & (table['WindStrength'] > 4.8), wc, table['Temperature'])
-    table['Windchill'] = round(wc,1)
+    table['Windchill'] = np.round(wc,1)
     return table
 
 def save_day(day):
