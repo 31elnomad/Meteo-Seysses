@@ -28,7 +28,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python main.py
+      - run: python main.py 20261125
 
       # NOUVEAU : enregistre le nouveau refresh token Netatmo dans les secrets
       - name: Mettre à jour le refresh token
