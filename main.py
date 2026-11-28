@@ -4,9 +4,9 @@ import sys
 import unicodedata
 from datetime import date, datetime, timedelta
 from scripts.getdata_2 import get_measures_between
+from zoneinfo import ZoneInfo
 
-ddeb = "2026-11-25"
-dfin = "2026-11-28"
+PARIS = ZoneInfo("Europe/Paris")
 
 def save_day(day):
     """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
