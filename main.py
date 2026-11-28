@@ -9,6 +9,14 @@ import pandas as pd
 
 PARIS = ZoneInfo("Europe/Paris")
 
+def dewpoint(table):
+    """Point de rosée (°C). T en °C, RH en %. Magnus"""
+    b, c = 17.62, 243.12
+    g = np.log(table['Humidity'] / 100) + b * table['Temperature'] / (c + table['Temperature'])
+    dp = c * g / (b - g)
+    table['Dew_point'] = dp
+    return table
+
 def save_day(day):
     """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
     start = datetime(day.year, day.month, day.day, tzinfo=PARIS)
@@ -33,6 +41,8 @@ def save_day(day):
         return
     table = pd.concat(columns, axis=1, sort=True)
     table.index.name = "heure"
+
+    table = dewpoint(table)
  
     folder = os.path.join("data", f"{day:%Y}", f"{day:%m}")
     os.makedirs(folder, exist_ok=True)
