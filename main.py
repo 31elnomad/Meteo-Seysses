@@ -18,6 +18,15 @@ def dewpoint(table):
     table['Dew_point'] = round(dp,1)
     return table
 
+def wind_chill(table):
+    """Température ressentie au vent (°C). T en °C, V en km/h.
+    Hors validité (T > 10 °C ou V <= 4,8 km/h), on renvoie T."""
+    v16 = np.power(table['WindStrength'], 0.16)
+    wc = 13.12 + 0.6215 * table['Temperature'] - 11.37 * v16 + 0.3965 * table['Temperature'] * v16
+    wc = np.where((table['Temperature'] <= 10) & (table['WindStrength'] > 4.8), wc, table['Temperature'])
+    print(wc)
+    quit()
+
 def save_day(day):
     """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
     start = datetime(day.year, day.month, day.day, tzinfo=PARIS)
