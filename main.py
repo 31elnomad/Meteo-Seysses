@@ -1,37 +1,61 @@
-from datetime import datetime
 import os
-import time
-import json
-from scripts.getdata_ import get_access_token, get_station_data
+import re
+import sys
+import unicodedata
+from datetime import date, datetime, timedelta
 from scripts.getdata_2 import get_measures_between
 
 ddeb = "2026-11-25"
 dfin = "2026-11-28"
 
+def save_day(day):
+    """Récupère le jour `day` (de 00:00 à 24:00, heure de Paris) et l'écrit dans un seul CSV."""
+    start = datetime(day.year, day.month, day.day, tzinfo=PARIS)
+    end = start + timedelta(days=1)
+    tables = get_measures_between(start, end)
+ 
+    columns = []
+    for module, df in tables.items():
+        if df.empty:
+            continue
+        df = df[(df.index >= start) & (df.index < end)].copy()
+        df.columns = [f"{clean(module)}_{c}" for c in df.columns]
+        # on garde les heures de Netatmo (xx:x2:30, xx:x7:30...) en les arrondissant à la minute
+        # pour que les modules tombent sur la même ligne même avec quelques secondes d'écart
+        # (arrondi fait en UTC pour ne pas buter sur le changement d'heure)
+        df.index = df.index.tz_convert("UTC").floor("1min").tz_convert(PARIS)
+        df = df[df.index < end].groupby(level=0).mean()
+        columns.append(df)
+ 
+    if not columns:
+        print(f"{day} : aucune mesure")
+        return
+    table = pd.concat(columns, axis=1, sort=True)
+    table.index.name = "heure"
+ 
+    folder = os.path.join(DATA, f"{day:%Y}", f"{day:%m}")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, f"{day:%Y-%m-%d}.csv")
+    table.to_csv(path, float_format="%.6g")
+    print(f"{day} : {len(table)} lignes, {table.shape[1]} colonnes -> {path}")
+
+def parse(d):
+    return datetime.strptime(d, "%Y-%m-%d").date()
+
+def clean(name):
+    """'Extérieur' -> 'Exterieur' (noms de colonnes sans accents ni espaces)."""
+    s = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    return re.sub(r"[^A-Za-z0-9]+", "_", s).strip("_")
+
 if __name__ == "__main__":
-    os.makedirs("data", exist_ok=True) 
-    data = get_measures_between(ddeb, dfin)
-    print(data)
-    quit()
-    for module, df in data.items():
-        print(f"\n{module} : {len(df)} mesures")
-        print(df.head(3))
-        df.to_csv(f"data/netatmo_{module}.csv")
-
-"""station = b['body']['devices'][0]
-
-dashboard = station["dashboard_data"]
-
-results = {
-  "date": time.strftime("%d.%m.%Y à %H:%M"),
-  "pression": dashboard.get("Pressure")
-}
-
-with open("data.json", "w", encoding="utf-8") as f:
-    json.dump(results, f, ensure_ascii=False, indent=2)
-
-print(results)
-for module in station['modules']:
-  print(module)
-#print(b['body']['devices'][0].keys())"""
-
+    args = sys.argv[1:]
+    os.makedirs("data", exist_ok=True)
+    if not args:
+        days = [datetime.now(PARIS).date() - timedelta(days=1)]          # la veille
+    elif len(args) == 1:
+        days = [parse(args[0])]
+    else:
+        d0, d1 = parse(args[0]), parse(args[1])
+        days = [d0 + timedelta(days=i) for i in range((d1 - d0).days + 1)]
+    for d in days:
+        save_day(d)
