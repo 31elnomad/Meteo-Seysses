@@ -117,6 +117,6 @@ def get_measures_between(start, end, scale="5min"):
             df.index.name = "heure"
             tables[name] = df
             if name in ['NAModule3']:
-                table[name] = table[name].round(1)
+                tables[name] = tables[name].round(1)
             print(tables[name])
     return tables
