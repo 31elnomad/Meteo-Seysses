@@ -5,6 +5,7 @@ import unicodedata
 from datetime import date, datetime, timedelta
 from scripts.getdata_2 import get_measures_between
 from zoneinfo import ZoneInfo
+import pandas as pd
 
 PARIS = ZoneInfo("Europe/Paris")
 
