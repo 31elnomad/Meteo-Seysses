@@ -6,7 +6,7 @@ from scripts.getdata_ import get_access_token, get_station_data
 from scripts.getdata_2 import get_measures_between
 
 ddeb = "2026-11-25"
-dfin = "2026-11-26"
+dfin = "2026-11-28"
 
 if __name__ == "__main__":
     os.makedirs("data", exist_ok=True) 
