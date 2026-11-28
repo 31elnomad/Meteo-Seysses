@@ -20,12 +20,12 @@ def save_day(day):
         if df.empty:
             continue
         df = df[(df.index >= start) & (df.index < end)].copy()
-        df.columns = [f"{clean(module)}_{c}" for c in df.columns]
+        df.columns = [f"{c}" for c in df.columns]
         # on garde les heures de Netatmo (xx:x2:30, xx:x7:30...) en les arrondissant à la minute
         # pour que les modules tombent sur la même ligne même avec quelques secondes d'écart
         # (arrondi fait en UTC pour ne pas buter sur le changement d'heure)
         df.index = df.index.tz_convert("UTC").floor("1min").tz_convert(PARIS)
-        df = df[df.index < end].groupby(level=0).mean()
+        df = df[df.index < end].groupby(level=0).first()
         columns.append(df)
  
     if not columns:
