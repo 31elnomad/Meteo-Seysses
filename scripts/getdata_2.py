@@ -82,7 +82,7 @@ def windir(table):
         a = table[c]
         secteur = ((a % 360 + 11.25) // 22.5 % 16)
         table[c] = secteur.map(lambda i: SECTEURS[int(i)] if pd.notna(i) else "")
-        table.loc[a < 0, c + "_dir"] = ""
+        table.loc[a < 0, c] = ""
     return table
         
 def get_measures_between(start, end, scale="5min"):
